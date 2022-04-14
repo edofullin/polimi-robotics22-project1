@@ -1,29 +1,40 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "sensor_msgs/JointState.h"
+#include "geometry_msgs/TwistStamped.h"
 #include <math.h>
 
-double wheelAngle(int i) {
-    double rad = 45.0 * (M_PI / 180.0);
-    return i % 2 == 1 ? rad : -rad;
-}
+ros::Publisher pub;
 
 void newVelReceived(const sensor_msgs::JointState::ConstPtr& msg) {
     auto vel = msg.get()->velocity;
-    std::vector<double> vel_s(4); // perpendicolare alla ruota
-    std::vector<double> vel_e(4); // parallela alla ruota
+    double vel_x; // velocita dritta
+    double vel_y; // velocita laterale
+    double vel_z; // velocita angolare
+    double velocity; // modulo velocita
+    double ang; // angolo velocita
 
-    for (size_t i = 0; i < vel.size(); i++) {
-        double vel_ir = (vel[i]/60) * 0.07 * cos(45.0 * (M_PI / 180.0));
+    geometry_msgs::TwistStamped out; //messaggio da stampare
 
-        vel_s[i] = vel_ir * sin(wheelAngle(i));
-        vel_e[i] = (vel[i]/60)*0.07 + vel_ir*cos(wheelAngle(i));
-    }
+    vel_x = (vel[0] + vel[1] + vel[2] + vel[3]) / 60 * 0.07 / 4.0;
+    vel_y = (-vel[0] + vel[1] - vel[2] + vel[3]) / 60 * 0.07 / 4.0;
+    vel_z = (-vel[0] + vel[1] + vel[2] - vel[3]) / 60 * 0.07 / 4.0 / (0.2 + 0.169);
 
-    
+    velocity = sqrt(pow(vel_x, 2) * pow(vel_y, 2));
+    ang = atan(vel_y/vel_x) * 180 / M_PI;
 
-    ROS_INFO("vel_s: [%lf %lf %lf %lf]", vel_s[0], vel_s[1], vel_s[2], vel_s[3]);
-    ROS_INFO("vel_e: [%lf %lf %lf %lf]", vel_e[0], vel_e[1], vel_e[2], vel_e[3]);
+    if(vel_x < 0) ang += 180.0;
+
+    ROS_INFO("vel: [%lf %lf]", velocity, ang);
+
+    out.twist.linear.x = vel_x;
+    out.twist.linear.y = vel_y;
+    out.twist.linear.z = 0.0;
+    out.twist.angular.x = 0.0;
+    out.twist.angular.y = 0.0;
+    out.twist.angular.z = vel_z;
+
+    pub.publish(out);
 }
 
 int main(int argc, char **argv) {
@@ -31,6 +42,7 @@ int main(int argc, char **argv) {
     ros::NodeHandle n;
 
     ros::Subscriber sub = n.subscribe("/wheel_states", 1000, newVelReceived);
+    pub = n.advertise<geometry_msgs::TwistStamped>("cmd_vel", 1000);
 
     ros::spin();
 
