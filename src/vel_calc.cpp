@@ -56,8 +56,8 @@ void newVelReceived(const sensor_msgs::JointState::ConstPtr& msg) {
 
     pub.publish(out_robot);
 
-    odom_vel_x = vel_x * cos(odom_ang); - vel_y * sin(odom_ang);
-    odom_vel_y = vel_x * sin(odom_ang); + vel_y * cos(odom_ang);
+    odom_vel_x = vel_x * cos(odom_ang * M_PI / 180) - vel_y * sin(odom_ang * M_PI / 180);
+    odom_vel_y = vel_x * sin(odom_ang * M_PI / 180) + vel_y * cos(odom_ang * M_PI / 180);
 
     odom_x = odom_x + odom_vel_x * dt;
     odom_y = odom_y + odom_vel_y * dt;
@@ -93,7 +93,7 @@ void newVelReceived(const sensor_msgs::JointState::ConstPtr& msg) {
     out_odom.child_frame_id = "base_link";
 
     out_odom.twist.twist.linear.x = odom_vel_x;
-    out_odom.twist.twist.linear.y = odom_vel_x;
+    out_odom.twist.twist.linear.y = odom_vel_y;
     out_odom.twist.twist.angular.z = vel_z;
 
     pub2.publish(out_odom);
