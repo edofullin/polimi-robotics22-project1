@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(project1)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs tf)
 
 ## Declare a catkin package
 catkin_package()
