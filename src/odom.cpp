@@ -13,7 +13,6 @@ double odom_x = 0.0; // posizione x odometria
 double odom_y = 0.0; // posizione y odometria
 double odom_ang = 0.0; // angolo odometria
 
-ros::Time current_time;
 ros::Time last_time;
 
 void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
@@ -24,9 +23,8 @@ void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
     double velocity = sqrt(pow(vel_x, 2) * pow(vel_y, 2));
     double ang = atan(vel_y/vel_x) * 180 / M_PI;; // angolo velocita robot
 
-    current_time = ros::Time::now();
-
-    double dt = (current_time - last_time).toSec();
+    ros::Time nowTime = ros::Time::now();
+    double dt = (nowTime - last_time).toSec();
 
     nav_msgs::Odometry out_odom; //messaggio da stampare
     tf::TransformBroadcaster odom_broad;
@@ -51,7 +49,7 @@ void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(odom_ang);
 
     geometry_msgs::TransformStamped odom_trans;
-    odom_trans.header.stamp = current_time;
+    odom_trans.header.stamp = nowTime;
     odom_trans.header.frame_id = "odom";
     odom_trans.child_frame_id = "base_link";
 
@@ -62,7 +60,7 @@ void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
 
     odom_broad.sendTransform(odom_trans);
 
-    out_odom.header.stamp = current_time;
+    out_odom.header.stamp = nowTime;
     out_odom.header.frame_id = "odom";
 
     out_odom.pose.pose.position.x = odom_x;
