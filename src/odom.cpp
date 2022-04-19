@@ -18,10 +18,10 @@ ros::Time last_time;
 void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
 
     double vel_x = msg.get()->twist.linear.x;
-    double vel_y = msg.get()->twist.linear.x;
+    double vel_y = msg.get()->twist.linear.y;
     double vel_z = msg.get()->twist.angular.z;
     double velocity = sqrt(pow(vel_x, 2) * pow(vel_y, 2));
-    double ang = atan(vel_y/vel_x) * 180 / M_PI;; // angolo velocita robot
+    double ang = atan2(vel_y, vel_x) * 180.0 / M_PI; // angolo velocita robot
 
     ros::Time nowTime = ros::Time::now();
     double dt = (nowTime - last_time).toSec();
@@ -29,22 +29,17 @@ void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
     nav_msgs::Odometry out_odom; //messaggio da stampare
     tf::TransformBroadcaster odom_broad;
 
-    if(vel_x < 0) ang += 180.0;
-
     ROS_INFO("vel: [%lf %lf]", velocity, ang);
 
 
-    odom_vel_x = vel_x * cos(odom_ang * M_PI / 180) - vel_y * sin(odom_ang * M_PI / 180);
-    odom_vel_y = vel_x * sin(odom_ang * M_PI / 180) + vel_y * cos(odom_ang * M_PI / 180);
+    odom_vel_x = vel_x * cos(odom_ang) - vel_y * sin(odom_ang);
+    odom_vel_y = vel_x * sin(odom_ang) + vel_y * cos(odom_ang);
 
     odom_x = odom_x + odom_vel_x * dt;
     odom_y = odom_y + odom_vel_y * dt;
-    odom_ang = odom_ang + vel_z * dt * 180 / M_PI;
+    odom_ang = odom_ang + vel_z * dt;
 
-    while (odom_ang > 360.0) odom_ang -= 360.0;
-    while (odom_ang < 0) odom_ang += 360.0;
-
-    ROS_INFO("odom: [%lf %lf %lf]", odom_x, odom_y, odom_ang);
+    ROS_INFO("odom: [%lf %lf %lf]", odom_x, odom_y, odom_ang * 180.0 / M_PI);
 
     geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(odom_ang);
 
