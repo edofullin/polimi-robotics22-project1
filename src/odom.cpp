@@ -53,6 +53,8 @@ void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
     odom_trans.transform.translation.z = 0.0;
     odom_trans.transform.rotation = odom_quat;
 
+    ROS_INFO("odom_quat: [%lf %lf]", odom_quat.z, odom_quat.w);
+
     odom_broad.sendTransform(odom_trans);
 
     out_odom.header.stamp = nowTime;
