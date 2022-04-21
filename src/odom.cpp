@@ -20,7 +20,7 @@ void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
     double vel_x = msg.get()->twist.linear.x;
     double vel_y = msg.get()->twist.linear.y;
     double vel_z = msg.get()->twist.angular.z;
-    double velocity = sqrt(pow(vel_x, 2) * pow(vel_y, 2));
+    double velocity = sqrt(pow(vel_x, 2) + pow(vel_y, 2));
     double ang = atan2(vel_y, vel_x) * 180.0 / M_PI; // angolo velocita robot
 
     ros::Time nowTime = ros::Time::now();

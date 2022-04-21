@@ -2,6 +2,7 @@
 #include "sensor_msgs/JointState.h"
 #include "geometry_msgs/TwistStamped.h"
 #include <math.h>
+#include "const.h"
 
 ros::Publisher pub;
 
@@ -15,7 +16,7 @@ void newVelReceivedTicks(const sensor_msgs::JointState::ConstPtr& msg) {
     if(init)
         for(size_t i = 0; i < 4; ++i) {
             ros::Duration dt = msg.get()->header.stamp - oldtime;
-            vel[i] = (msg.get()->position[i] - oldpos[i]) / dt.toSec();
+            vel[i] = 2.0 * M_PI * (msg.get()->position[i] - oldpos[i]) / TPR / GEAR_RATIO / dt.toSec();
         }
 
     oldpos =  msg.get()->position;
@@ -26,9 +27,9 @@ void newVelReceivedTicks(const sensor_msgs::JointState::ConstPtr& msg) {
     ROS_INFO("wheel_speed: [%lf %lf %lf %lf]", vel[0], vel[1], vel[2], vel[3]);
 
 
-    double vel_x = (vel[0] + vel[1] + vel[2] + vel[3]) / 60.0 * 0.07 / 4.0; // velocita x robot
-    double vel_y = (-vel[0] + vel[1] + vel[2] - vel[3]) / 60.0 * 0.07 / 4.0; // velocita y robot
-    double vel_z = (-vel[0] + vel[1] - vel[2] + vel[3]) / 60.0 * 0.07 / 4.0 / (0.20 + 0.169); // velocita angolare
+    double vel_x = (vel[0] + vel[1] + vel[2] + vel[3]) * WHEEL_RADIUS / 4.0; // velocita x robot
+    double vel_y = (-vel[0] + vel[1] + vel[2] - vel[3]) * WHEEL_RADIUS / 4.0; // velocita y robot
+    double vel_z = (-vel[0] + vel[1] - vel[2] + vel[3]) * WHEEL_RADIUS / 4.0 / (ROBOT_LENGTH + ROBOT_HEIGHT); // velocita angolare
 
     geometry_msgs::TwistStamped out_robot; //messaggio da stampare
 
