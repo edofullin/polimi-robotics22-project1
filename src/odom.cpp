@@ -31,7 +31,7 @@ public:
     }
 
 
-    void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
+    void velocity_received_callback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
 
         double vel_x = msg.get()->twist.linear.x;
         double vel_y = msg.get()->twist.linear.y;
@@ -95,7 +95,7 @@ public:
     void main_loop() {
         ros::NodeHandle n;
 
-        ros::Subscriber sub = n.subscribe("/cmd_vel", 1000, &Odometry::newVelReceived, this);
+        ros::Subscriber sub = n.subscribe("/cmd_vel", 1000, &Odometry::velocity_received_callback, this);
         pub2 = n.advertise<nav_msgs::Odometry>("/odom", 1000);
 
         ros::ServiceServer resetService = n.advertiseService("/odom/reset", &Odometry::reset_pose_callback, this);

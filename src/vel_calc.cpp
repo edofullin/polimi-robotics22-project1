@@ -10,7 +10,7 @@ std::vector<double> oldpos(4, 0.0);
 ros::Time oldtime(0, 0);
 bool init = false;
 
-void newVelReceivedTicks(const sensor_msgs::JointState::ConstPtr& msg) {
+void position_received_callback(const sensor_msgs::JointState::ConstPtr& msg) {
     std::vector<double> vel(4, 0.0);
 
     if(init)
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     ros::init(argc, argv, "vel_calc");
     ros::NodeHandle n;
 
-    ros::Subscriber sub = n.subscribe("/wheel_states", 1000, newVelReceivedTicks);
+    ros::Subscriber sub = n.subscribe("/wheel_states", 1000, position_received_callback);
     pub = n.advertise<geometry_msgs::TwistStamped>("cmd_vel", 1000);
 
 
