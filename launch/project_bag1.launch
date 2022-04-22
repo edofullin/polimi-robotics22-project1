@@ -1,9 +1,10 @@
 <launch>
 
-<arg name="bag_file_name" value="bag1" />
+<!-- <arg name="bag" value="bag2" /> -->
 
-<node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(find project1)/bags/$(arg bag_file_name).bag --rate 0.4"/>
+<node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(find project1)/bags/$(arg bag).bag"/>
 <node pkg="project1" type="vel_calc" name="vel_calc"/>
 <node pkg="project1" type="odom" name="odom" output="screen"/>
+<node pkg="project1" type="tf2_broadcaster" name="tf2_broadcaster"/>
 
 </launch>

@@ -1,7 +1,7 @@
 #define ADJUST_VALUES
 
 
-#ifdef ADJUSTED_VALUES
+#ifdef ADJUST_VALUES
 
 #define WHEEL_RADIUS 0.083
 #define TPR 40.0

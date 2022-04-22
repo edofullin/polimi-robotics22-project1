@@ -1,14 +1,14 @@
 #include "ros/ros.h"
 #include "geometry_msgs/TwistStamped.h"
 #include "nav_msgs/Odometry.h"
-#include "tf/transform_broadcaster.h"
 #include "project1/Reset.h"
+#include <tf2/LinearMath/Quaternion.h>
 #include <math.h>
 
 class Odometry {
 
 private:
-    ros::Publisher pub2;
+    ros::Publisher odom_publisher;
 
     double odom_vel_x = 0.0; // velocita x odometria
     double odom_vel_y = 0.0; // velocita y odometria
@@ -43,7 +43,6 @@ public:
         double dt = (nowTime - last_time).toSec();
 
         nav_msgs::Odometry out_odom; //messaggio da stampare
-        tf::TransformBroadcaster odom_broad;
 
         ROS_INFO("vel: [%lf %lf]", velocity, ang);
 
@@ -57,37 +56,20 @@ public:
 
         ROS_INFO("odom: [%lf %lf %lf]", odom_x, odom_y, odom_ang * 180.0 / M_PI);
 
-        geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(odom_ang);
-
-        geometry_msgs::TransformStamped odom_trans;
-        odom_trans.header.stamp = nowTime;
-        odom_trans.header.frame_id = "odom";
-        odom_trans.child_frame_id = "base_link";
-
-        odom_trans.transform.translation.x = odom_x;
-        odom_trans.transform.translation.y = odom_y;
-        odom_trans.transform.translation.z = 0.0;
-        odom_trans.transform.rotation = odom_quat;
-
-        ROS_INFO("odom_quat: [%lf %lf]", odom_quat.z, odom_quat.w);
-
-        odom_broad.sendTransform(odom_trans);
+        tf2::Quaternion tf_quat;
+        tf_quat.setRPY(0, 0, odom_ang);
 
         out_odom.header.stamp = nowTime;
-        out_odom.header.frame_id = "odom";
 
         out_odom.pose.pose.position.x = odom_x;
         out_odom.pose.pose.position.y = odom_y;
         out_odom.pose.pose.position.z = 0.0;
-        out_odom.pose.pose.orientation = odom_quat;
+        out_odom.pose.pose.orientation.x = tf_quat.x();
+        out_odom.pose.pose.orientation.y = tf_quat.y();
+        out_odom.pose.pose.orientation.z = tf_quat.z();
+        out_odom.pose.pose.orientation.w = tf_quat.w();
 
-        out_odom.child_frame_id = "base_link";
-
-        out_odom.twist.twist.linear.x = odom_vel_x;
-        out_odom.twist.twist.linear.y = odom_vel_y;
-        out_odom.twist.twist.angular.z = vel_z;
-
-        pub2.publish(out_odom);
+        odom_publisher.publish(out_odom);
 
         last_time = ros::Time::now();
     }
@@ -96,7 +78,7 @@ public:
         ros::NodeHandle n;
 
         ros::Subscriber sub = n.subscribe("/cmd_vel", 1000, &Odometry::velocity_received_callback, this);
-        pub2 = n.advertise<nav_msgs::Odometry>("/odom", 1000);
+        odom_publisher = n.advertise<nav_msgs::Odometry>("/odom", 1000);
 
         ros::ServiceServer resetService = n.advertiseService("/odom/reset", &Odometry::reset_pose_callback, this);
 

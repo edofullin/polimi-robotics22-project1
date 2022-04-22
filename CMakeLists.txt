@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(project1)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs tf message_generation geometry_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs tf2 tf2_ros message_generation geometry_msgs)
 
 add_service_files(
     FILES
@@ -30,3 +30,7 @@ target_link_libraries(odom ${catkin_LIBRARIES})
 
 add_executable(vel_calc src/vel_calc.cpp)
 target_link_libraries(vel_calc ${catkin_LIBRARIES})
+
+add_executable(tf2_broadcaster src/tf2_broadcaster.cpp)
+add_dependencies(tf2_broadcaster ${catkin_EXPORTED_TARGETS})
+target_link_libraries(tf2_broadcaster ${catkin_LIBRARIES})
