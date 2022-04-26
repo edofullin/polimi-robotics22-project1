@@ -5,6 +5,12 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <math.h>
 
+enum int_method
+{
+    EULER,
+    RK
+};
+
 class Odometry {
 
 private:
@@ -15,6 +21,7 @@ private:
     double odom_x = 0.0; // posizione x odometria
     double odom_y = 0.0; // posizione y odometria
     double odom_ang = 0.0; // angolo odometria
+    int_method method = RK;
 
     ros::Time last_time;
 
@@ -37,18 +44,23 @@ public:
         double vel_y = msg.get()->twist.linear.y;
         double vel_z = msg.get()->twist.angular.z;
         double velocity = sqrt(pow(vel_x, 2) + pow(vel_y, 2));
-        double ang = atan2(vel_y, vel_x) * 180.0 / M_PI; // angolo velocita robot
+        double ang = atan2(vel_y, vel_x); // angolo velocita robot
 
         ros::Time nowTime = ros::Time::now();
         double dt = (nowTime - last_time).toSec();
 
         nav_msgs::Odometry out_odom; //messaggio da stampare
 
-        ROS_INFO("vel: [%lf %lf]", velocity, ang);
+        ROS_INFO("vel: [%lf %lf]", velocity, ang * 180.0 / M_PI);
 
-
-        odom_vel_x = vel_x * cos(odom_ang) - vel_y * sin(odom_ang);
-        odom_vel_y = vel_x * sin(odom_ang) + vel_y * cos(odom_ang);
+        if(method == EULER){
+            odom_vel_x = velocity * cos(odom_ang + ang);
+            odom_vel_y = velocity * sin(odom_ang + ang);
+        }
+        else{
+            odom_vel_x = velocity * cos(odom_ang + ang + (vel_z * dt) / 2);
+            odom_vel_y = velocity * sin(odom_ang + ang + (vel_z * dt) / 2);
+        }
 
         odom_x = odom_x + odom_vel_x * dt;
         odom_y = odom_y + odom_vel_y * dt;

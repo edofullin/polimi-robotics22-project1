@@ -22,7 +22,7 @@ public:
         transformStamped.child_frame_id = "odom";
 
         transformStamped.transform.translation.x = message.pose.pose.position.x;
-        transformStamped.transform.translation.y = message.pose.pose.position.x;
+        transformStamped.transform.translation.y = message.pose.pose.position.y;
         transformStamped.transform.translation.z = 0.0;
 
         transformStamped.transform.rotation.x = message.pose.pose.orientation.x;

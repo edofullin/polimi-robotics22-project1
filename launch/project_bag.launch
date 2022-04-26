@@ -6,5 +6,6 @@
 <node pkg="project1" type="vel_calc" name="vel_calc"/>
 <node pkg="project1" type="odom" name="odom" output="screen"/>
 <node pkg="project1" type="tf2_broadcaster" name="tf2_broadcaster"/>
+<node pkg="project1" type="wheel_calc" name="wheel_calc"/>
 
 </launch>

@@ -9,6 +9,11 @@ add_service_files(
     Reset.srv
 )
 
+add_message_files(
+    FILES
+    Wheel.msg
+)
+
 generate_messages(
     DEPENDENCIES
     std_msgs
@@ -34,3 +39,7 @@ target_link_libraries(vel_calc ${catkin_LIBRARIES})
 add_executable(tf2_broadcaster src/tf2_broadcaster.cpp)
 add_dependencies(tf2_broadcaster ${catkin_EXPORTED_TARGETS})
 target_link_libraries(tf2_broadcaster ${catkin_LIBRARIES})
+
+add_executable(wheel_calc src/wheel_calc.cpp)
+add_dependencies(wheel_calc ${catkin_EXPORTED_TARGETS})
+target_link_libraries(wheel_calc ${catkin_LIBRARIES})
