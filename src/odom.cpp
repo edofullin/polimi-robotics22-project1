@@ -1,90 +1,124 @@
 #include "ros/ros.h"
 #include "geometry_msgs/TwistStamped.h"
 #include "nav_msgs/Odometry.h"
-#include "tf/transform_broadcaster.h"
+#include "project1/Reset.h"
+#include "project1/intparamsConfig.h"
+#include <dynamic_reconfigure/server.h>
+#include <tf2/LinearMath/Quaternion.h>
 #include <math.h>
 
-ros::Publisher pub;
-ros::Publisher pub2;
+enum int_method
+{
+    EULER = 0,
+    RK = 1
+};
 
-double odom_vel_x = 0.0; // velocita x odometria
-double odom_vel_y = 0.0; // velocita y odometria
-double odom_x = 0.0; // posizione x odometria
-double odom_y = 0.0; // posizione y odometria
-double odom_ang = 0.0; // angolo odometria
+class Odometry {
 
-ros::Time last_time;
+private:
+    ros::Publisher odom_publisher;
 
-void newVelReceived(const geometry_msgs::TwistStamped::ConstPtr& msg) {
+    double odom_vel_x = 0.0; // velocita x odometria
+    double odom_vel_y = 0.0; // velocita y odometria
+    double odom_x = 0.0; // posizione x odometria
+    double odom_y = 0.0; // posizione y odometria
+    double odom_ang = 0.0; // angolo odometria
+    int_method method = EULER;
 
-    double vel_x = msg.get()->twist.linear.x;
-    double vel_y = msg.get()->twist.linear.y;
-    double vel_z = msg.get()->twist.angular.z;
-    double velocity = sqrt(pow(vel_x, 2) + pow(vel_y, 2));
-    double ang = atan2(vel_y, vel_x) * 180.0 / M_PI; // angolo velocita robot
+    ros::Time last_time;
 
-    ros::Time nowTime = ros::Time::now();
-    double dt = (nowTime - last_time).toSec();
+public:
 
-    nav_msgs::Odometry out_odom; //messaggio da stampare
-    tf::TransformBroadcaster odom_broad;
+    bool reset_pose_callback(project1::Reset::Request &req, project1::Reset::Response &res) {
+        this->odom_x = req.newX;
+        this->odom_y = req.newY;
+        this->odom_ang = req.newTheta;
 
-    ROS_INFO("vel: [%lf %lf]", velocity, ang);
+        ROS_INFO("Called reset with args [%lf %lf %lf]", req.newX, req.newY, req.newTheta);
+
+        return true;
+    }
 
 
-    odom_vel_x = vel_x * cos(odom_ang) - vel_y * sin(odom_ang);
-    odom_vel_y = vel_x * sin(odom_ang) + vel_y * cos(odom_ang);
+    void velocity_received_callback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
 
-    odom_x = odom_x + odom_vel_x * dt;
-    odom_y = odom_y + odom_vel_y * dt;
-    odom_ang = odom_ang + vel_z * dt;
+        double vel_x = msg.get()->twist.linear.x;
+        double vel_y = msg.get()->twist.linear.y;
+        double vel_z = msg.get()->twist.angular.z;
+        double velocity = sqrt(pow(vel_x, 2) + pow(vel_y, 2));
+        double ang = atan2(vel_y, vel_x); // angolo velocita robot
 
-    ROS_INFO("odom: [%lf %lf %lf]", odom_x, odom_y, odom_ang * 180.0 / M_PI);
+        ros::Time nowTime = ros::Time::now();
+        double dt = (nowTime - last_time).toSec();
 
-    geometry_msgs::Quaternion odom_quat = tf::createQuaternionMsgFromYaw(odom_ang);
+        nav_msgs::Odometry out_odom; //messaggio da stampare
 
-    geometry_msgs::TransformStamped odom_trans;
-    odom_trans.header.stamp = nowTime;
-    odom_trans.header.frame_id = "odom";
-    odom_trans.child_frame_id = "base_link";
+        ROS_INFO("vel: [%lf %lf]", velocity, ang * 180.0 / M_PI);
 
-    odom_trans.transform.translation.x = odom_x;
-    odom_trans.transform.translation.y = odom_y;
-    odom_trans.transform.translation.z = 0.0;
-    odom_trans.transform.rotation = odom_quat;
+        if(method == EULER){
+            odom_vel_x = velocity * cos(odom_ang + ang);
+            odom_vel_y = velocity * sin(odom_ang + ang);
+        }
+        else{
+            odom_vel_x = velocity * cos(odom_ang + ang + (vel_z * dt) / 2);
+            odom_vel_y = velocity * sin(odom_ang + ang + (vel_z * dt) / 2);
+        }
 
-    ROS_INFO("odom_quat: [%lf %lf]", odom_quat.z, odom_quat.w);
+        odom_x = odom_x + odom_vel_x * dt;
+        odom_y = odom_y + odom_vel_y * dt;
+        odom_ang = odom_ang + vel_z * dt;
 
-    odom_broad.sendTransform(odom_trans);
+        ROS_INFO("odom: [%lf %lf %lf] using %s", odom_x, odom_y, odom_ang * 180.0 / M_PI, method ? "runge_kutta" : "euler");
 
-    out_odom.header.stamp = nowTime;
-    out_odom.header.frame_id = "odom";
+        tf2::Quaternion tf_quat;
+        tf_quat.setRPY(0, 0, odom_ang);
 
-    out_odom.pose.pose.position.x = odom_x;
-    out_odom.pose.pose.position.y = odom_y;
-    out_odom.pose.pose.position.z = 0.0;
-    out_odom.pose.pose.orientation = odom_quat;
+        out_odom.header.stamp = nowTime;
 
-    out_odom.child_frame_id = "base_link";
+        out_odom.pose.pose.position.x = odom_x;
+        out_odom.pose.pose.position.y = odom_y;
+        out_odom.pose.pose.position.z = 0.0;
+        out_odom.pose.pose.orientation.x = tf_quat.x();
+        out_odom.pose.pose.orientation.y = tf_quat.y();
+        out_odom.pose.pose.orientation.z = tf_quat.z();
+        out_odom.pose.pose.orientation.w = tf_quat.w();
 
-    out_odom.twist.twist.linear.x = odom_vel_x;
-    out_odom.twist.twist.linear.y = odom_vel_y;
-    out_odom.twist.twist.angular.z = vel_z;
+        odom_publisher.publish(out_odom);
 
-    pub2.publish(out_odom);
+        last_time = ros::Time::now();
+    }
 
-    last_time = ros::Time::now();
-}
+    void dyn_rec_callback(project1::intparamsConfig &config, uint32_t level) {
+        ROS_INFO("dynamic reconfigure: [%d]", config.odom_int);
 
-int main(int argc, char **argv) {
+        this->method = (int_method)config.odom_int;
+    }
+
+    void main_loop() {
+        ros::NodeHandle n;
+
+        ros::Subscriber sub = n.subscribe("/cmd_vel", 1000, &Odometry::velocity_received_callback, this);
+        odom_publisher = n.advertise<nav_msgs::Odometry>("/odom", 1000);
+
+        ros::ServiceServer resetService = n.advertiseService("/odom/reset", &Odometry::reset_pose_callback, this);
+
+        dynamic_reconfigure::Server<project1::intparamsConfig> dynServer;
+        dynamic_reconfigure::Server<project1::intparamsConfig>::CallbackType dyn_rec_f;
+
+        dyn_rec_f = boost::bind(&Odometry::dyn_rec_callback, this, _1, _2);
+        
+        dynServer.setCallback(dyn_rec_f);
+
+        ros::spin();
+    }
+
+};
+
+int main(int argc, char** argv) {
     ros::init(argc, argv, "odom");
-    ros::NodeHandle n;
+    Odometry odom;
 
-    ros::Subscriber sub = n.subscribe("/cmd_vel", 1000, newVelReceived);
-    pub2 = n.advertise<nav_msgs::Odometry>("/odom", 1000);
-
-
-    ros::spin();
+    odom.main_loop();
 
     return 0;
 }

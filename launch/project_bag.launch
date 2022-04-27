@@ -1,0 +1,25 @@
+<launch>
+
+<!-- <arg name="bag" value="bag2" /> -->
+
+<param name="robot_wheel_radius" value="0.083"/>
+<param name="robot_tpr" value="40.0"/>
+<param name="robot_size_x" value="0.25"/>
+<param name="robot_size_y" value="0.17"/>
+<param name="robot_gear_ratio" value="5.0"/>
+
+<!--
+<param name="robot_wheel_radius" value="0.07"/>
+<param name="robot_tpr" value="42.0"/>
+<param name="robot_size_x" value="0.2"/>
+<param name="robot_size_y" value="0.169"/>
+<param name="robot_gear_ratio" value="5.0"/>
+-->
+
+<node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(find project1)/bags/$(arg bag).bag"/>
+<node pkg="project1" type="vel_calc" name="vel_calc"/>
+<node pkg="project1" type="odom" name="odom" output="screen"/>
+<node pkg="project1" type="tf2_broadcaster" name="tf2_broadcaster"/>
+<node pkg="project1" type="wheel_calc" name="wheel_calc"/>
+
+</launch>
