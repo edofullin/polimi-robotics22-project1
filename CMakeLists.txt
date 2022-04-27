@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(project1)
 
 ## Find catkin and any catkin packages
-find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs tf2 tf2_ros message_generation geometry_msgs)
+find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs tf2 tf2_ros message_generation geometry_msgs dynamic_reconfigure)
 
 add_service_files(
     FILES
@@ -12,6 +12,10 @@ add_service_files(
 add_message_files(
     FILES
     Wheel.msg
+)
+
+generate_dynamic_reconfigure_options(
+    cfg/intparams.cfg
 )
 
 generate_messages(

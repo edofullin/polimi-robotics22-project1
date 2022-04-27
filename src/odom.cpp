@@ -2,13 +2,15 @@
 #include "geometry_msgs/TwistStamped.h"
 #include "nav_msgs/Odometry.h"
 #include "project1/Reset.h"
+#include "project1/intparamsConfig.h"
+#include <dynamic_reconfigure/server.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <math.h>
 
 enum int_method
 {
-    EULER,
-    RK
+    EULER = 0,
+    RK = 1
 };
 
 class Odometry {
@@ -21,7 +23,7 @@ private:
     double odom_x = 0.0; // posizione x odometria
     double odom_y = 0.0; // posizione y odometria
     double odom_ang = 0.0; // angolo odometria
-    int_method method = RK;
+    int_method method = EULER;
 
     ros::Time last_time;
 
@@ -66,7 +68,7 @@ public:
         odom_y = odom_y + odom_vel_y * dt;
         odom_ang = odom_ang + vel_z * dt;
 
-        ROS_INFO("odom: [%lf %lf %lf]", odom_x, odom_y, odom_ang * 180.0 / M_PI);
+        ROS_INFO("odom: [%lf %lf %lf] using %s", odom_x, odom_y, odom_ang * 180.0 / M_PI, method ? "runge_kutta" : "euler");
 
         tf2::Quaternion tf_quat;
         tf_quat.setRPY(0, 0, odom_ang);
@@ -86,6 +88,12 @@ public:
         last_time = ros::Time::now();
     }
 
+    void dyn_rec_callback(project1::intparamsConfig &config, uint32_t level) {
+        ROS_INFO("dynamic reconfigure: [%d]", config.odom_int);
+
+        this->method = (int_method)config.odom_int;
+    }
+
     void main_loop() {
         ros::NodeHandle n;
 
@@ -94,6 +102,12 @@ public:
 
         ros::ServiceServer resetService = n.advertiseService("/odom/reset", &Odometry::reset_pose_callback, this);
 
+        dynamic_reconfigure::Server<project1::intparamsConfig> dynServer;
+        dynamic_reconfigure::Server<project1::intparamsConfig>::CallbackType dyn_rec_f;
+
+        dyn_rec_f = boost::bind(&Odometry::dyn_rec_callback, this, _1, _2);
+        
+        dynServer.setCallback(dyn_rec_f);
 
         ros::spin();
     }
