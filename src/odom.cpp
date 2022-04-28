@@ -13,10 +13,6 @@ enum int_method
     RK = 1
 };
 
-double odom_x_init;
-double odom_y_init;
-double odom_ang_init;
-
 class Odometry {
 
 private:
@@ -99,16 +95,7 @@ public:
     }
 
     void main_loop() {
-
         ros::NodeHandle n;
-
-        n.getParam("odom_x_init", odom_x_init);
-        n.getParam("odom_y_init", odom_y_init);
-        n.getParam("odom_ang_init", odom_ang_init);
-
-        odom_x = odom_x_init;
-        odom_y = odom_y_init;
-        odom_ang = odom_ang_init;
 
         ros::Subscriber sub = n.subscribe("/cmd_vel", 1000, &Odometry::velocity_received_callback, this);
         odom_publisher = n.advertise<nav_msgs::Odometry>("/odom", 1000);
