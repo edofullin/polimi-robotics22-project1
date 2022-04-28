@@ -2,19 +2,9 @@
 
 <!-- <arg name="bag" value="bag2" /> -->
 
-<param name="robot_wheel_radius" value="0.083"/>
-<param name="robot_tpr" value="40.0"/>
-<param name="robot_size_x" value="0.25"/>
-<param name="robot_size_y" value="0.17"/>
-<param name="robot_gear_ratio" value="5.0"/>
-
-<!--
-<param name="robot_wheel_radius" value="0.07"/>
-<param name="robot_tpr" value="42.0"/>
-<param name="robot_size_x" value="0.2"/>
-<param name="robot_size_y" value="0.169"/>
-<param name="robot_gear_ratio" value="5.0"/>
--->
+<param name="odom_x_init" value="0.0"/>
+<param name="odom_y_init" value="0.0"/>
+<param name="odom_ang_init" value="0.0"/>
 
 <node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(find project1)/bags/$(arg bag).bag"/>
 <node pkg="project1" type="vel_calc" name="vel_calc"/>
