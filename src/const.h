@@ -3,9 +3,9 @@
 
 #ifdef ADJUST_VALUES
 
-#define WHEEL_RADIUS 0.083
+#define WHEEL_RADIUS 0.073
 #define TPR 40.0
-#define ROBOT_LENGTH 0.25
+#define ROBOT_LENGTH 0.2
 #define ROBOT_HEIGHT 0.17
 #define GEAR_RATIO 5.0
 

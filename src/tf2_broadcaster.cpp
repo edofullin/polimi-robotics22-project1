@@ -35,7 +35,7 @@ public:
 
     Tf2Broadcaster() {
 
-        sub = n.subscribe("", 1000, &Tf2Broadcaster::callback, this);
+        sub = n.subscribe("/odom", 1000, &Tf2Broadcaster::callback, this);
 
     }
 
