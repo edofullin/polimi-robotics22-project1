@@ -74,7 +74,7 @@ public:
         tf_quat.setRPY(0, 0, odom_ang);
 
         out_odom.header.stamp = nowTime;
-
+        out_odom.header.frame_id = "base_link";
         out_odom.pose.pose.position.x = odom_x;
         out_odom.pose.pose.position.y = odom_y;
         out_odom.pose.pose.position.z = 0.0;

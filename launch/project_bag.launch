@@ -2,15 +2,15 @@
 
 <!-- <arg name="bag" value="bag2" /> -->
 
-<param name="robot_wheel_radius" value="0.083"/>
+<param name="robot_wheel_radius" value="0.073"/>
 <param name="robot_tpr" value="40.0"/>
-<param name="robot_size_x" value="0.25"/>
+<param name="robot_size_x" value="0.2"/>
 <param name="robot_size_y" value="0.17"/>
 <param name="robot_gear_ratio" value="5.0"/>
 
-<param name="initial_x" value="1"/>
-<param name="initial_y" value="1"/>
-<param name="initial_theta" value="3.14"/>
+<param name="initial_x" value="0"/>
+<param name="initial_y" value="0"/>
+<param name="initial_theta" value="0"/>
 
 <!--
 <param name="robot_wheel_radius" value="0.07"/>
