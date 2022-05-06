@@ -106,6 +106,10 @@ public:
         dynamic_reconfigure::Server<project1::intparamsConfig>::CallbackType dyn_rec_f;
 
         dyn_rec_f = boost::bind(&Odometry::dyn_rec_callback, this, _1, _2);
+
+        n.getParam("initial_x", odom_x);
+        n.getParam("initial_y", odom_y);
+        n.getParam("initial_theta", odom_ang);
         
         dynServer.setCallback(dyn_rec_f);
 
