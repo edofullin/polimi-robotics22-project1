@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(project1)
+project(fg_project1)
 
 ## Find catkin and any catkin packages
 find_package(catkin REQUIRED COMPONENTS roscpp rospy std_msgs tf2 tf2_ros message_generation geometry_msgs dynamic_reconfigure)

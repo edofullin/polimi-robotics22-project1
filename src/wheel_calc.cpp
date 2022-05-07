@@ -1,14 +1,18 @@
 #include "ros/ros.h"
 #include "geometry_msgs/TwistStamped.h"
 #include "nav_msgs/Odometry.h"
-#include "project1/Reset.h"
+#include "fg_project1/Reset.h"
 #include <tf2/LinearMath/Quaternion.h>
 #include <math.h>
-#include "project1/Wheel.h"
-#include "const.h"
+#include "fg_project1/Wheel.h"
+
 
 ros::Publisher pub;
-
+double robot_size_x;
+double robot_size_y;
+double robot_tpr;
+double robot_wheel_radius;
+double robot_gear_ratio;
 
 void velocity_received_callback(const geometry_msgs::TwistStamped::ConstPtr& msg) {
 
@@ -16,13 +20,13 @@ void velocity_received_callback(const geometry_msgs::TwistStamped::ConstPtr& msg
     double vel_y = msg.get()->twist.linear.y;
     double vel_z = msg.get()->twist.angular.z;
 
-    project1::Wheel rpms;
+    fg_project1::Wheel rpms;
     ros::Time nowTime = ros::Time::now();
 
-    double rpm_fl = (vel_x - vel_y - (ROBOT_LENGTH + ROBOT_HEIGHT) * vel_z) / WHEEL_RADIUS * GEAR_RATIO * 60.0;
-    double rpm_fr = (vel_x + vel_y + (ROBOT_LENGTH + ROBOT_HEIGHT) * vel_z) / WHEEL_RADIUS * GEAR_RATIO * 60.0;
-    double rpm_rr = (vel_x + vel_y - (ROBOT_LENGTH + ROBOT_HEIGHT) * vel_z) / WHEEL_RADIUS * GEAR_RATIO * 60.0;
-    double rpm_rl = (vel_x - vel_y + (ROBOT_LENGTH + ROBOT_HEIGHT) * vel_z) / WHEEL_RADIUS * GEAR_RATIO * 60.0;
+    double rpm_fl = (vel_x - vel_y - (robot_size_x + robot_size_y) * vel_z) / robot_wheel_radius * robot_gear_ratio * 60.0;
+    double rpm_fr = (vel_x + vel_y + (robot_size_x + robot_size_y) * vel_z) / robot_wheel_radius * robot_gear_ratio * 60.0;
+    double rpm_rr = (vel_x + vel_y - (robot_size_x + robot_size_y) * vel_z) / robot_wheel_radius * robot_gear_ratio * 60.0;
+    double rpm_rl = (vel_x - vel_y + (robot_size_x + robot_size_y) * vel_z) / robot_wheel_radius * robot_gear_ratio * 60.0;
 
     rpms.header.stamp = nowTime;
     rpms.rpm_fl = rpm_fl;
@@ -41,7 +45,13 @@ int main(int argc, char **argv) {
     ros::NodeHandle n;
 
     ros::Subscriber sub = n.subscribe("/cmd_vel", 1000, velocity_received_callback);
-    pub = n.advertise<project1::Wheel>("/wheels_rpm", 1000);
+    pub = n.advertise<fg_project1::Wheel>("/wheels_rpm", 1000);
+
+    n.getParam("robot_wheel_radius", robot_wheel_radius);
+    n.getParam("robot_size_x", robot_size_x);
+    n.getParam("robot_size_y", robot_size_y);
+    n.getParam("robot_tpr", robot_tpr);
+    n.getParam("robot_gear_ratio", robot_gear_ratio);
 
 
     ros::spin();

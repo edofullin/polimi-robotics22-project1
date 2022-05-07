@@ -1,8 +1,8 @@
 #include "ros/ros.h"
 #include "geometry_msgs/TwistStamped.h"
 #include "nav_msgs/Odometry.h"
-#include "project1/Reset.h"
-#include "project1/intparamsConfig.h"
+#include "fg_project1/Reset.h"
+#include "fg_project1/intparamsConfig.h"
 #include <dynamic_reconfigure/server.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <math.h>
@@ -29,7 +29,7 @@ private:
 
 public:
 
-    bool reset_pose_callback(project1::Reset::Request &req, project1::Reset::Response &res) {
+    bool reset_pose_callback(fg_project1::Reset::Request &req, fg_project1::Reset::Response &res) {
         this->odom_x = req.newX;
         this->odom_y = req.newY;
         this->odom_ang = req.newTheta;
@@ -88,7 +88,7 @@ public:
         last_time = ros::Time::now();
     }
 
-    void dyn_rec_callback(project1::intparamsConfig &config, uint32_t level) {
+    void dyn_rec_callback(fg_project1::intparamsConfig &config, uint32_t level) {
         ROS_INFO("dynamic reconfigure: [%d]", config.odom_int);
 
         this->method = (int_method)config.odom_int;
@@ -102,8 +102,8 @@ public:
 
         ros::ServiceServer resetService = n.advertiseService("/odom/reset", &Odometry::reset_pose_callback, this);
 
-        dynamic_reconfigure::Server<project1::intparamsConfig> dynServer;
-        dynamic_reconfigure::Server<project1::intparamsConfig>::CallbackType dyn_rec_f;
+        dynamic_reconfigure::Server<fg_project1::intparamsConfig> dynServer;
+        dynamic_reconfigure::Server<fg_project1::intparamsConfig>::CallbackType dyn_rec_f;
 
         dyn_rec_f = boost::bind(&Odometry::dyn_rec_callback, this, _1, _2);
 
