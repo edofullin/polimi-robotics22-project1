@@ -26,7 +26,7 @@ The name of the parameters are self-explainatory.
 How to launch without a bag
 
 ```shell
-$ roslaunch project1 project1_nobag.launch
+$ roslaunch fg_project1 project1_nobag.launch
 ```
 
 ### Sources and modules
