@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
     n.getParam("robot_gear_ratio", robot_gear_ratio);
 
     ros::Subscriber sub = n.subscribe("/wheel_states", 1000, position_received_callback);
-    pub = n.advertise<geometry_msgs::TwistStamped>("cmd_vel", 1000);
+    pub = n.advertise<geometry_msgs::TwistStamped>("/cmd_vel", 1000);
 
 
     ros::spin();

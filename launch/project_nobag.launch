@@ -18,11 +18,10 @@
 -->
 
 <!-- INITIAL POSITION -->
-<param name="initial_x" value="0"/>
-<param name="initial_y" value="0"/>
-<param name="initial_theta" value="0"/>
+<param name="initial_x" value="0.0"/>
+<param name="initial_y" value="0.0"/>
+<param name="initial_theta" value="0.0"/>
 
-<node pkg="rosbag" type="play" name="rosbag_play" args="--clock $(find project1)/bags/$(arg bag).bag"/>
 <node pkg="project1" type="vel_calc" name="vel_calc"/>
 <node pkg="project1" type="odom" name="odom" output="screen"/>
 <node pkg="project1" type="tf2_broadcaster" name="tf2_broadcaster"/>

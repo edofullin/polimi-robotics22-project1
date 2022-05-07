@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
     ros::NodeHandle n;
 
     ros::Subscriber sub = n.subscribe("/cmd_vel", 1000, velocity_received_callback);
-    pub = n.advertise<project1::Wheel>("wheels_rpm", 1000);
+    pub = n.advertise<project1::Wheel>("/wheels_rpm", 1000);
 
 
     ros::spin();
